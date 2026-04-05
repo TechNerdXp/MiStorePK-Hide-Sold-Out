@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "MiStorePK Hide Sold Out",
+  "version": "1.0",
+  "description": "Hides sold-out product listings on mistore.pk for a cleaner shopping experience.",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://mistore.pk/*",
+        "*://www.mistore.pk/*",
+        "*://mistorepk.myshopify.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16":  "img/icon16.png",
+    "48":  "img/icon48.png",
+    "128": "img/icon128.png"
+  },
+  "host_permissions": [
+    "*://mistore.pk/*",
+    "*://www.mistore.pk/*",
+    "*://mistorepk.myshopify.com/*"
+  ]
+}
