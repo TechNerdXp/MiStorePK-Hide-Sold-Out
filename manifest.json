@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "MiStorePK Hide Sold Out",
-  "version": "1.0",
-  "description": "Hides sold-out product listings on mistore.pk for a cleaner shopping experience.",
+  "version": "1.1",
+  "author": "TechNerdXp",
+  "description": "Hides sold-out product listings on mistore.pk for a cleaner shopping experience. Developed by TechNerdXp.",
   "content_scripts": [
     {
       "matches": [

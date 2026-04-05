@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Generate Chrome Web Store graphics for MiStorePK Hide Sold Out.
-  - img/promo_tile.png   440 x 280  (store listing tile)
-  - img/screenshot1.png  1280 x 800 (store screenshot)
+  - img/promo_tile.png    440 x 280   (store listing tile)
+  - img/screenshot1.png  1280 x 800  (store screenshot)
+  - img/marquee.png      1400 x 560  (marquee banner, no alpha)
 """
 
 import os, math
@@ -285,8 +286,218 @@ def make_screenshot():
     print(f"  screenshot1.png  (1280×800)")
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# 3. MARQUEE BANNER  1400 × 560  (no alpha — RGB only)
+# ══════════════════════════════════════════════════════════════════════════════
+def make_marquee():
+    W, H = 1400, 560
+    img = Image.new("RGB", (W, H), ORANGE_DARK)
+    draw = ImageDraw.Draw(img)
+
+    # ── Deep layered gradient: left warm amber → right burnt dark ─────────────
+    for x in range(W):
+        t = x / W
+        r = int(255 * (1-t) + 130 * t)
+        g = int(165 * (1-t) +  28 * t)
+        b = int( 20 * (1-t) +   0 * t)
+        draw.line([(x, 0), (x, H)], fill=(r, g, b))
+
+    # Vertical top-to-bottom darkening vignette
+    for y in range(H):
+        t = (y / H) ** 1.6
+        alpha_darken = int(t * 80)
+        draw.line([(0, y), (W, y)], fill=(0, 0, 0, alpha_darken) if False else
+                  tuple(max(0, c - alpha_darken) for c in [
+                      int(255*(1-y/W*0.3)), int(165*(1-y/W*0.3)), 20]))
+    # Redo cleanly: diagonal gradient + vignette in one pass
+    for y in range(H):
+        yf = y / H
+        for x in range(0, W, 1):
+            xf = x / W
+            t = xf * 0.75 + yf * 0.25      # diagonal weight
+            r = int(255 * (1-t) + 120 * t)
+            g = int(160 * (1-t) +  25 * t)
+            b = int( 15 * (1-t) +   0 * t)
+            # top-edge highlight
+            edge = max(0, int((1 - yf*3) * 18)) if yf < 0.33 else 0
+            draw.point((x, y), fill=(min(255,r+edge), min(255,g+edge//3), b))
+
+    # ── Geometric accent: large faint circle top-right ────────────────────────
+    cx, cy, cr = int(W * 0.82), int(H * -0.1), int(H * 0.88)
+    for ring in range(3):
+        rr = cr - ring * 38
+        draw.ellipse([cx-rr, cy-rr, cx+rr, cy+rr],
+                     outline=(255, 200, 100, 0), width=1)
+        # manual low-opacity ring
+        tmp = Image.new("RGB", (W, H), (0, 0, 0))
+        td = ImageDraw.Draw(tmp)
+        td.ellipse([cx-rr, cy-rr, cx+rr, cy+rr],
+                   outline=(255, 190, 80), width=max(1, 3-ring))
+        img = Image.blend(img, tmp, alpha=0.07)
+        draw = ImageDraw.Draw(img)
+
+    # ── Diagonal light sweep (left side) ──────────────────────────────────────
+    sweep = Image.new("RGB", (W, H), (0, 0, 0))
+    sd = ImageDraw.Draw(sweep)
+    sd.polygon([(0,0), (int(W*0.42),0), (int(W*0.28),H), (0,H)],
+               fill=(255, 200, 100))
+    sweep = sweep.filter(ImageFilter.GaussianBlur(60))
+    img = Image.blend(img, sweep, alpha=0.10)
+    draw = ImageDraw.Draw(img)
+
+    # ── Icon (large, left-center) ──────────────────────────────────────────────
+    icon = load_icon(128)
+    if icon:
+        icon_size = 160
+        icon = icon.resize((icon_size, icon_size), Image.LANCZOS)
+        # Drop shadow
+        shadow_layer = Image.new("RGB", (W, H), (120, 25, 0))
+        sx = int(W * 0.08)
+        sy = (H - icon_size) // 2
+        img.paste(shadow_layer.crop([0,0,icon_size,icon_size]),
+                  (sx+6, sy+8))
+        img = img.filter(ImageFilter.GaussianBlur(0))  # no-op, keep crisp
+        draw = ImageDraw.Draw(img)
+        # Paste icon (flatten alpha onto current bg)
+        bg_crop = img.crop([sx, sy, sx+icon_size, sy+icon_size])
+        icon_rgb = Image.new("RGB", (icon_size, icon_size), (0,0,0))
+        icon_rgb.paste(bg_crop)
+        icon_rgb.paste(icon, (0,0), icon)
+        img.paste(icon_rgb, (sx, sy))
+        draw = ImageDraw.Draw(img)
+
+    # ── Text block (center) ────────────────────────────────────────────────────
+    tx = int(W * 0.24)
+    f_eyebrow = try_font(16)
+    f_title   = try_font(64, bold=True)
+    f_sub     = try_font(26, bold=True)
+    f_body    = try_font(19)
+    f_credit  = try_font(15)
+
+    # Eyebrow
+    ey = int(H * 0.18)
+    draw.text((tx, ey), "CHROME EXTENSION  ·  FREE  ·  MISTORE.PK",
+              font=f_eyebrow, fill=(255, 210, 140))
+
+    # Main title — two lines
+    draw.text((tx+3, ey+34), "Hide Sold Out", font=f_title,
+              fill=(0, 0, 0))           # shadow
+    draw.text((tx,   ey+32), "Hide Sold Out", font=f_title, fill=WHITE)
+
+    # Sub-heading
+    draw.text((tx+2, ey+112), "Browse only what's available.", font=f_sub,
+              fill=(0,0,0))
+    draw.text((tx,   ey+110), "Browse only what's available.", font=f_sub,
+              fill=(255, 235, 200))
+
+    # Divider
+    draw.rectangle([tx, ey+152, tx+380, ey+155], fill=(255,190,80))
+
+    # Bullet points
+    bullets = [
+        "Hides sold-out cards automatically on every page",
+        "Works with infinite scroll & collection filters",
+        "Zero config — install and forget",
+    ]
+    f_bul = try_font(17)
+    for i, b in enumerate(bullets):
+        by = ey + 168 + i * 30
+        draw.ellipse([tx, by+6, tx+8, by+14], fill=(255,190,80))
+        draw.text((tx+18, by), b, font=f_bul, fill=(255, 230, 195))
+
+    # Developed by
+    draw.text((tx, ey+270), "Developed by TechNerdXp",
+              font=f_credit, fill=(255, 195, 120))
+
+    # ── Right side: "before / after" mini cards ────────────────────────────────
+    rx = int(W * 0.70)
+    ry = int(H * 0.12)
+    card_w, card_h = 148, 190
+    gap = 18
+
+    labels = ["Available", "Hidden", "Available", "Hidden"]
+    sold   = [False, True, False, True]
+    for i, (lbl, so) in enumerate(zip(labels, sold)):
+        col = i % 2
+        row = i // 2
+        cx2 = rx + col * (card_w + gap)
+        cy2 = ry + row * (card_h + gap)
+
+        if so:
+            draw.rounded_rectangle([cx2,cy2,cx2+card_w,cy2+card_h],
+                                   radius=8, fill=(160,145,135))
+            # Diagonal hatch
+            for d in range(-card_h, card_w, 16):
+                draw.line([(cx2+d, cy2), (cx2+d+card_h, cy2+card_h)],
+                          fill=(140,128,120), width=1)
+            # Sold-out badge
+            bw = 82
+            draw.rounded_rectangle(
+                [cx2+card_w//2-bw//2, cy2+card_h//2-12,
+                 cx2+card_w//2+bw//2, cy2+card_h//2+12],
+                radius=4, fill=(180,50,0))
+            fb = try_font(11, bold=True)
+            centered_text(draw, "SOLD OUT", fb,
+                          cy2+card_h//2-7, cx2*2+card_w, WHITE)
+            # X overlay
+            draw.line([(cx2+12,cy2+12),(cx2+card_w-12,cy2+card_h-12)],
+                      fill=(200,80,0), width=3)
+            draw.line([(cx2+card_w-12,cy2+12),(cx2+12,cy2+card_h-12)],
+                      fill=(200,80,0), width=3)
+        else:
+            draw.rounded_rectangle([cx2,cy2,cx2+card_w,cy2+card_h],
+                                   radius=8, fill=(255,252,248))
+            draw.rounded_rectangle([cx2+10,cy2+10,cx2+card_w-10,cy2+card_h-50],
+                                   radius=5, fill=(240,233,225))
+            # Simple phone icon
+            draw.rounded_rectangle([cx2+card_w//2-14,cy2+30,
+                                    cx2+card_w//2+14,cy2+card_h-60],
+                                   radius=4, fill=(200,190,180))
+            draw.rounded_rectangle([cx2+12,cy2+card_h-44,cx2+card_w-12,cy2+card_h-32],
+                                   radius=3, fill=(60,50,40))
+            draw.rounded_rectangle([cx2+12,cy2+card_h-28,cx2+card_w//2-4,cy2+card_h-18],
+                                   radius=3, fill=ORANGE_DEEP)
+
+        # Label under card
+        fl = try_font(12)
+        col_lbl = (255,200,130) if not so else (200,170,150)
+        centered_text(draw, lbl, fl, cy2+card_h+5, cx2*2+card_w, col_lbl)
+
+    # Arrow + label between columns
+    ax = rx + card_w + gap//2
+    ay = ry + card_h//2
+    draw.line([(ax-8,ay),(ax+8,ay)], fill=(255,190,80), width=2)
+
+    # ── Bottom strip ──────────────────────────────────────────────────────────
+    strip_y = H - 52
+    for x in range(W):
+        t = x / W
+        r = int(180*(1-t) + 100*t)
+        g = int( 45*(1-t) +  18*t)
+        b = 0
+        draw.point((x, strip_y), fill=(r,g,b))
+    draw.rectangle([0, strip_y, W, H], fill=(0,0,0,0))  # dummy
+    for yy in range(strip_y, H):
+        for x in range(W):
+            t = x / W
+            r = int(160*(1-t) + 90*t)
+            g = int( 38*(1-t) + 15*t)
+            b = 0
+            draw.point((x, yy), fill=(r,g,b))
+
+    fs = try_font(14)
+    centered_text(draw, "MiStorePK Hide Sold Out  ·  Free Chrome Extension  ·  Developed by TechNerdXp",
+                  fs, strip_y + 16, W, (255, 215, 160))
+
+    # No alpha — save as RGB PNG
+    path = os.path.join(OUT, "marquee.png")
+    img.convert("RGB").save(path, "PNG")
+    print(f"  marquee.png  (1400×560, no alpha)")
+
+
 # ── Run ───────────────────────────────────────────────────────────────────────
 print("Generating store graphics...")
 make_promo_tile()
 make_screenshot()
+make_marquee()
 print("\nDone! Files saved to /img/")
