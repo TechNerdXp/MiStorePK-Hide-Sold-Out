@@ -1,0 +1,309 @@
+/* Hide Sold Out — the one stylesheet for the popup.
+ *
+ * ---------------------------------------------------------------------------
+ * THIS PRODUCT'S OWN SYSTEM, WITH ONE INHERITED ELEMENT.
+ *
+ * Hide Sold Out is a TechNerdXp product, and the way a product in this house
+ * says so is a signature, not a repaint.
+ *
+ *   COLOUR is #FF6900 — the orange of the store this extension works on, used
+ *     deliberately so the popup reads as belonging to the task rather than
+ *     arriving from somewhere else. It is the product's single accent; there
+ *     is no second. On light it darkens to #C24A00, which is the same hue
+ *     pulled down only as far as 4.5:1 as type demands, because the pure
+ *     orange manages 2.89:1 on white and is unreadable there.
+ *
+ *     Stated plainly, since it is the one rule this product bends: that colour
+ *     belongs to mistore.pk, and wearing it is what makes an unaffiliated
+ *     extension look official. Everything else here works to undo that — the
+ *     listing says unofficial, the mark is nothing like Xiaomi's, and no store
+ *     logo appears on any surface. Reverting is two tokens below plus BRAND in
+ *     tooling_/gen-icons.js.
+ *
+ *   TYPE is the family resemblance. Poppins Light (300) and Medium (500),
+ *     bundled in fonts/. No bold, no italic, no third weight. Tracking rises
+ *     as size falls, never one tracking value everywhere.
+ *
+ *   THE PARENT APPEARS ONCE PER SURFACE, as the wordmark alone in the footer:
+ *     small, Silver, the shard through the `h` carrying the only green in the
+ *     product, linking to technerdxp.com and never styled as a button. No
+ *     credit sentence is built around it. The old store art stamped "Developed
+ *     by TechNerdXp" twice on one banner; this is the correction.
+ *
+ *   Deliberately NOT inherited: the house charcoal ground and Signal Green as
+ *     an accent. The shard inside the wordmark is the only green thing here.
+ *
+ * No CDN, no framework. Everything the popup paints with is in this file and
+ * in fonts/.
+ * ---------------------------------------------------------------------------
+ */
+
+/* Poppins, subset to latin, shipped inside the package under the SIL Open Font
+   License 1.1, which permits bundling. Local disk, no network in the path. */
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("fonts/poppins-300-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/poppins-500-latin.woff2") format("woff2");
+}
+
+/* ---- DARK. The identity: warm near-black, so the orange sits on a ground of
+   its own temperature rather than on a neutral grey sheet. ---- */
+:root {
+  color-scheme: dark light;
+
+  --mshs-canvas: #171310;
+  --mshs-surface: #211b16;
+  --mshs-line: #2f271f;
+  --mshs-ink: #f2ede7;
+
+  /* Two quiet tiers. `muted` is ink softened and carries secondary copy;
+     `silver` is the label tier and never carries a sentence. */
+  --mshs-muted: rgb(242 237 231 / 0.72);
+  --mshs-silver: #9c9186;
+
+  /* Named for its role, so a retune does not leave these rules lying. */
+  --mshs-brand: #ff6900;
+  --mshs-brand-hi: #ff8534;
+  --mshs-brand-soft: rgb(255 105 0 / 0.14);
+  --mshs-on-brand: #171310;
+
+  --mshs-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -16px rgb(0 0 0 / 0.7);
+}
+
+/* ---- LIGHT. This product's own light, warmed a shade toward the accent so
+   the orange belongs to the page rather than landing on it. ---- */
+@media (prefers-color-scheme: light) {
+  :root {
+    --mshs-canvas: #faf7f4;
+    --mshs-surface: #ffffff;
+    --mshs-line: #ece5de;
+    --mshs-ink: #1a1512;
+
+    --mshs-muted: rgb(26 21 18 / 0.72);
+    --mshs-silver: #6e6259;
+
+    /* The same orange, pulled down only as far as 4.5:1 as type demands. The
+       pure #FF6900 reads at 2.89:1 on white — a headline colour there, not a
+       text colour, and the count is text. */
+    --mshs-brand: #c24a00;
+    --mshs-brand-hi: #a63f00;
+    --mshs-brand-soft: rgb(194 74 0 / 0.1);
+    --mshs-on-brand: #ffffff;
+
+    --mshs-shadow: 0 1px 2px rgb(26 21 18 / 0.06), 0 12px 32px -18px rgb(26 21 18 / 0.3);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--mshs-canvas);
+  color: var(--mshs-ink);
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------------------------------------- the popup */
+
+/* 300px is the width at which "16 products on this page" sits on one line and
+   the two segments of the toggle are each wide enough to read. */
+.pop {
+  width: 300px;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ------------------------------------------------------------------ head */
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--mshs-line);
+}
+
+/* The product's own mark, not the parent's. This is the only image here. */
+.head img {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.title {
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+
+/* The host, stated plainly. Not a claim of affiliation — a statement of where
+   the extension works. */
+.host {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: lowercase;
+  color: var(--mshs-silver);
+}
+
+/* ----------------------------------------------------------------- count */
+
+.count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* The number carries the accent, because it is the one fact the popup exists
+   to report. Light weight at this size: Poppins 300 at 30px is a display
+   figure without a display weight. */
+.count b {
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--mshs-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Wording that is true in both states. In Hide these cards are gone, in Peek
+   they are dimmed — "sold out on this page" is the fact underneath both, so
+   the sentence does not have to change when the toggle moves. */
+.count span {
+  color: var(--mshs-muted);
+}
+
+.count small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--mshs-silver);
+}
+
+/* ---------------------------------------------------------------- toggle */
+
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  background: var(--mshs-surface);
+  border: 1px solid var(--mshs-line);
+  border-radius: 10px;
+}
+
+.mode {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 7px 4px 6px;
+  background: transparent;
+  color: var(--mshs-muted);
+  font-family: inherit;
+  font-weight: 300;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+
+.mode:hover {
+  color: var(--mshs-ink);
+}
+
+.mode:focus-visible {
+  outline: 2px solid var(--mshs-brand);
+  outline-offset: 1px;
+}
+
+.mode[aria-pressed="true"] {
+  background: var(--mshs-brand-soft);
+  border-color: var(--mshs-brand);
+  color: var(--mshs-brand);
+  font-weight: 500;
+}
+
+/* One line saying what the state you are in does. It changes with the toggle,
+   which is the only moving copy in the popup. */
+.hint {
+  margin: -6px 2px 0;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--mshs-silver);
+  min-height: 2.9em;
+}
+
+/* ------------------------------------------------------------ THE SIGNATURE */
+
+/* The footer, and the only place the parent company appears. The wordmark on
+   its own, with no credit sentence built around it: Silver type with the shard
+   through the `h` carrying the only colour in the line, so it reads as a
+   signature and not as a second call to action beside the control above it.
+   This is the whole dose. Nothing else in this stylesheet is the parent's. */
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 11px;
+  border-top: 1px solid var(--mshs-line);
+}
+
+.wordmark {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--mshs-silver);
+  text-decoration: none;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.wordmark:hover {
+  color: var(--mshs-ink);
+}
+
+/* The shard stays Signal Green. It is the parent's mark, and a mark recoloured
+   to this product's orange is a different mark. It is the one green thing here,
+   it is a hairline wide, and it appears once per surface. */
+.wm-cut {
+  position: relative;
+}
+
+.wm-cut::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.13em;
+  height: 1.95em;
+  transform: translate(-50%, -50%) rotate(13deg);
+  pointer-events: none;
+  clip-path: polygon(50% 0%, 100% 36%, 50% 100%, 0% 36%);
+  background: linear-gradient(
+    to bottom,
+    #30c819 0%,
+    #30c819 26%,
+    #60e84a 40%,
+    #30c819 60%,
+    #30c819 100%
+  );
+}

@@ -1,9 +1,25 @@
 {
   "manifest_version": 3,
   "name": "MiStorePK Hide Sold Out",
-  "version": "1.1",
-  "author": "TechNerdXp",
-  "description": "Hides sold-out product listings on mistore.pk for a cleaner shopping experience. Developed by TechNerdXp.",
+  "version": "2.0",
+  "description": "Hide sold-out products on mistore.pk, or switch to Peek and see them dimmed instead. One toggle, applied live.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Hide Sold Out",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": [
@@ -12,14 +28,10 @@
         "*://mistorepk.myshopify.com/*"
       ],
       "js": ["content.js"],
-      "run_at": "document_idle"
+      "css": ["content.css"],
+      "run_at": "document_start"
     }
   ],
-  "icons": {
-    "16":  "img/icon16.png",
-    "48":  "img/icon48.png",
-    "128": "img/icon128.png"
-  },
   "host_permissions": [
     "*://mistore.pk/*",
     "*://www.mistore.pk/*",

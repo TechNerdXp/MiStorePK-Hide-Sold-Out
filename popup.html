@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hide Sold Out</title>
+  <link rel="stylesheet" href="ui.css">
+</head>
+<body>
+  <main class="pop">
+
+    <header class="head">
+      <img src="icons/icon32.png" alt="" width="20" height="20">
+      <span class="title">Hide Sold Out</span>
+      <span class="host">mistore.pk</span>
+    </header>
+
+    <!-- The count is the page in front of you, answered by the content script
+         in the active tab. It reads the same in both states, because what it
+         counts — sold-out cards — does not change when the toggle moves. -->
+    <div class="count">
+      <b id="count">—</b>
+      <span>
+        sold out
+        <small id="context">on this page</small>
+      </span>
+    </div>
+
+    <div class="modes" role="group" aria-label="What to do with sold-out products">
+      <button type="button" class="mode" id="mode-hide" aria-pressed="false">Hide</button>
+      <button type="button" class="mode" id="mode-peek" aria-pressed="false">Peek</button>
+    </div>
+
+    <p class="hint" id="hint"></p>
+
+    <!-- The parent, once, in the corner. The wordmark alone: no credit line,
+         no button, one green shard through the `h`. -->
+    <footer class="foot">
+      <a class="wordmark" href="https://technerdxp.com" target="_blank" rel="noopener">Tec<span class="wm-cut">h</span>NerdXp</a>
+    </footer>
+
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

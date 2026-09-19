@@ -1,0 +1,68 @@
+/* ===========================================================================
+   Hide Sold Out — the two states, on someone else's page.
+
+   This stylesheet lands inside mistore.pk's own document, so every selector
+   here is namespaced `mshs-` and nothing is styled that we did not tag
+   ourselves. Two rules do the whole job.
+
+   The state is a class on <html>, not on the cards. Toggling the mode is then
+   one class swap on one element — no re-walking the grid, no second pass, and
+   the switch lands on cards that were tagged before the toggle and on cards the
+   theme injects after it, identically.
+
+   `content_scripts` CSS is injected before the document paints, which is why
+   both states live here rather than in JavaScript: a sold-out card is never
+   painted at full strength and then taken away.
+   =========================================================================== */
+
+/* --------------------------------------------------------------- Hide (default)
+   The card is removed from layout entirely, so the grid closes up behind it and
+   there is no gap where the product was. `!important` because the theme sets
+   `display` on these list items itself and specificity here is not negotiable —
+   this is the one thing the extension promises to do. */
+html.mshs-mode-hide li.mshs-sold {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------------ Peek
+   The card stays in the grid, dimmed and drained of colour. It is still a link,
+   still clickable, still keyboard reachable — only quieter.
+
+   Deliberately nothing else. The Dawn theme already renders its own "Sold out"
+   badge on these cards, and it is still there underneath: a banner, an overlay,
+   a red cross or a strikethrough on top of it would be the second time the page
+   says the same word, in a louder voice, in a document we do not own. */
+html.mshs-mode-peek li.mshs-sold {
+  opacity: 0.38 !important;
+  filter: grayscale(1) !important;
+  transition: opacity 0.18s ease, filter 0.18s ease;
+}
+
+/* The page's own label, unhidden — not a label of ours.
+
+   This store renders a "Sold out" badge on every sold-out card and then holds
+   it at opacity 0 until you hover the card. Peek would otherwise dim a card
+   and give no reason for it. So Peek stops the theme hiding the word it
+   already wrote, at the card's own dimmed strength: no banner, no overlay, no
+   cross, no second vocabulary. Delete this rule and Peek is pure dimming. */
+html.mshs-mode-peek li.mshs-sold .mshs-sold-label {
+  opacity: 1 !important;
+}
+
+/* Reading a dimmed card should not require guessing. Hover and keyboard focus
+   bring it most of the way back — enough to read the price and the name — and
+   it settles again when you leave. Still short of full strength, so a sold-out
+   card never looks available even while you are reading it. */
+html.mshs-mode-peek li.mshs-sold:hover,
+html.mshs-mode-peek li.mshs-sold:focus-within {
+  opacity: 0.85 !important;
+  filter: grayscale(0.35) !important;
+}
+
+/* Someone who has asked the OS for less motion gets the state change, not the
+   animation between states. */
+@media (prefers-reduced-motion: reduce) {
+  html.mshs-mode-peek li.mshs-sold {
+    transition: none;
+  }
+}
